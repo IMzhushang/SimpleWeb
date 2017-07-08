@@ -16,7 +16,8 @@ import java.util.Properties;
 public class PropsUtils {
 
 	/**
-	 *  根据路径获取到Properties对象
+	 * 根据路径获取到Properties对象
+	 * 
 	 * @param path
 	 * @return
 	 */
@@ -24,8 +25,12 @@ public class PropsUtils {
 		Properties properties = new Properties();
 		InputStream in;
 		try {
-			in = new BufferedInputStream(new FileInputStream("path"));
-			properties.load(in);
+			// 错误读取文件
+	//		 in = new BufferedInputStream(new FileInputStream(path));
+	//		 properties.load(in);
+			InputStream resourceAsStream = ClassUtils.getClassLoader()
+				.getResourceAsStream(path);
+			properties.load(resourceAsStream);
 			return properties;
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -37,15 +42,16 @@ public class PropsUtils {
 		return null;
 
 	}
-	
+
 	/**
-	 *  更具key 拿到 value 
+	 * 更具key 拿到 value
+	 * 
 	 * @param key
 	 * @param properties
 	 * @return
 	 */
-	public static String  getValueBykey(String key,Properties properties) {
-		 return properties.getProperty(key);
+	public static String getValueBykey(String key, Properties properties) {
+		return properties.getProperty(key);
 	}
 
 }

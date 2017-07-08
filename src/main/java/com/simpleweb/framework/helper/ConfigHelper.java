@@ -1,5 +1,10 @@
 package com.simpleweb.framework.helper;
 
+import java.util.Properties;
+
+import com.simpleweb.framework.ConfigConstant;
+import com.simpleweb.framework.util.PropsUtils;
+
 /**
  * 用来读取基本的配置文件
  * 
@@ -8,19 +13,22 @@ package com.simpleweb.framework.helper;
  */
 public final class ConfigHelper {
 
+	private static final Properties PROPER = PropsUtils
+			.LoadProperties(ConfigConstant.CONFING_FILES);
+
 	public static String getAppBasePackage() {
-		return null;
+		System.out.println("---->appBase" + PropsUtils.getValueBykey(ConfigConstant.APP_BASE_PACKAGE, PROPER));
+		return PropsUtils.getValueBykey(ConfigConstant.APP_BASE_PACKAGE, PROPER);
 
 	}
 
 	public static String getAppJspPath() {
-		// TODO Auto-generated method stub
-		return null;
+		return PropsUtils.getValueBykey(ConfigConstant.APP_JSP_PATH, PROPER);
 	}
 
 	public static String getAppAssetPath() {
-		// TODO Auto-generated method stub
-		return null;
+	//	System.out.println("---->appBase" + PropsUtils.getValueBykey(ConfigConstant.APP_BASE_PACKAGE, PROPER));
+		return PropsUtils.getValueBykey(ConfigConstant.APP_ASSET_PATH, PROPER);
 	}
 
 }

@@ -4,6 +4,7 @@
 	<groupId>com.simpleweb.framework</groupId>
 	<artifactId>SimpleWeb</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
 
 
 

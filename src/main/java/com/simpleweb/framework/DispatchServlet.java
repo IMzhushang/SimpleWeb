@@ -11,6 +11,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,10 +35,23 @@ import com.simpleweb.framework.util.StringUtils;
  * @author Administrator
  *
  */
+// @WebServlet( urlPatterns="/", loadOnStartup=0)
+@WebServlet(urlPatterns = "/*", loadOnStartup = 0)
 public class DispatchServlet extends HttpServlet {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
+		System.err.println("---------simple web start------------------");
+		System.err.println("---------simple web start------------------");
+		System.err.println("---------simple web start------------------");
+		System.err.println("---------simple web start------------------");
+		System.err.println("---------simple web start------------------");
+		System.err.println("---------simple web start------------------");
 		// 初始化相关的helper
 		HelperLoder.init();
 		// 获servletContext 用于注册servlet
@@ -46,12 +60,12 @@ public class DispatchServlet extends HttpServlet {
 		// 动态的注册jsp Servlet
 		ServletRegistration jspServlet = servletContext
 				.getServletRegistration("jsp");
-		jspServlet.addMapping(ConfigHelper.getAppJspPath() + "*");
+		jspServlet.addMapping("/WEB-INF/jsp/" + "*");
 
 		// 处理静态资源的servlet
 		ServletRegistration defaultServlet = servletContext
 				.getServletRegistration("default");
-		defaultServlet.addMapping(ConfigHelper.getAppAssetPath() + "*");
+		defaultServlet.addMapping("/WEB-INF/jsp/" + "*");
 	}
 
 	@Override
@@ -63,6 +77,8 @@ public class DispatchServlet extends HttpServlet {
 		String requestPath = request.getPathInfo();
 
 		Handler handler = ControllerHelper.getHandler(requestType, requestPath);
+
+		System.out.println("------>>>>> " + request.getRequestURL().toString());
 
 		// 找到了相对应的处理器
 		if (handler != null) {
@@ -127,7 +143,7 @@ public class DispatchServlet extends HttpServlet {
 							request.setAttribute(entry.getKey(),
 									entry.getValue());
 						}
-						// TODO  why 
+						// TODO why
 						request.getRequestDispatcher(
 								ConfigHelper.getAppJspPath() + path).forward(
 								request, response);
@@ -136,6 +152,7 @@ public class DispatchServlet extends HttpServlet {
 
 			} else {
 				// 数据类型
+				System.err.println("-----Response--- Data" );
 				Data data = (Data) result;
 				Object model = data.getModel();
 
@@ -144,6 +161,7 @@ public class DispatchServlet extends HttpServlet {
 					response.setCharacterEncoding("UTF-8");
 					PrintWriter writer = response.getWriter();
 					String json = JsonUtils.toJson(data);
+	                 System.err.println("-----Response---"  + json);
 					writer.write(json);
 					writer.flush();
 					writer.close();
@@ -152,6 +170,19 @@ public class DispatchServlet extends HttpServlet {
 
 		}
 
+	}
+
+	@Override
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		
+		  System.err.println("----doGet -----"  + req.getRequestURL());
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		System.err.println("----doPost -----"  + req.getRequestURL());
 	}
 
 }

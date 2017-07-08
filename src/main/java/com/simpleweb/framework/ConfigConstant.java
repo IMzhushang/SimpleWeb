@@ -7,5 +7,14 @@ package com.simpleweb.framework;
  *
  */
 public interface ConfigConstant {
+	
+	
+    String APP_BASE_PACKAGE   = "app_base_package";
+    String APP_JSP_PATH = "app_jsp_path";
+    String APP_ASSET_PATH = "app_asset_path";
+    
+    String  CONFING_FILES = "simpleweb.properties";
+    
+    
 
 }

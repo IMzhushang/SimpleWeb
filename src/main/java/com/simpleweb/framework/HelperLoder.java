@@ -19,9 +19,10 @@ public class HelperLoder {
 	public static void init() {
 		Class<?>[] classList = { ClassLoaderHelper.class, BeanHelper.class,
 				IOCHelper.class, ControllerHelper.class };
-
+  
 		for (int i = 0; i < classList.length; i++) {
 			ClassUtils.loadClass(classList[i].getName(), true);
 		}
+		System.err.println("---------simple web init------------------");
 	}
 }
