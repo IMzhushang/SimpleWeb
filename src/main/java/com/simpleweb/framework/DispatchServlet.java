@@ -60,12 +60,12 @@ public class DispatchServlet extends HttpServlet {
 		// 动态的注册jsp Servlet
 		ServletRegistration jspServlet = servletContext
 				.getServletRegistration("jsp");
-		jspServlet.addMapping("/WEB-INF/jsp/" + "*");
+		jspServlet.addMapping(ConfigHelper.getAppJspPath()+ "*");
 
 		// 处理静态资源的servlet
 		ServletRegistration defaultServlet = servletContext
 				.getServletRegistration("default");
-		defaultServlet.addMapping("/WEB-INF/jsp/" + "*");
+		defaultServlet.addMapping(ConfigHelper.getAppJspPath()+ "*");
 	}
 
 	@Override
@@ -145,7 +145,7 @@ public class DispatchServlet extends HttpServlet {
 						}
 						// TODO why
 						request.getRequestDispatcher(
-								ConfigHelper.getAppJspPath() + path).forward(
+								ConfigHelper.getAppJspPath() + path+".jsp").forward(
 								request, response);
 					}
 				}

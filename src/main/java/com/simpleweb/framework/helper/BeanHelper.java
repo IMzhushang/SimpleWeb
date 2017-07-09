@@ -22,7 +22,7 @@ public class BeanHelper {
 
 	static {
 		CLASS_BEAN = new HashMap<Class<?>, Object>();
-		Set<Class<?>> beanClass = ClassLoaderHelper.getBeanClass();
+		Set<Class<?>> beanClass = ClassHelper.getBeanClass();
 		for (Class<?> clazz : beanClass) {
 			Object newInstance = ReflectionUtils.newInstance(clazz);
 			CLASS_BEAN.put(clazz, newInstance);
@@ -50,9 +50,9 @@ public class BeanHelper {
 	 * @param object
 	 */
 	public static void setBean(Class<?> clazz, Object object) {
-		if (!CLASS_BEAN.containsKey(clazz)) {
+		
 			CLASS_BEAN.put(clazz, object);
-		}
+		
 	}
 
 	public static HashMap<Class<?>, Object> getBeanMap() {

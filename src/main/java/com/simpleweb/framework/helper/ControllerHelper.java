@@ -22,7 +22,7 @@ public final class ControllerHelper {
 
 	static {
 		// 遍历所有的controller 类 ，拿到标注有Action的方法
-		Set<Class<?>> controllerClassSet = ClassLoaderHelper
+		Set<Class<?>> controllerClassSet = ClassHelper
 				.getControllerClassSet();
 		if (controllerClassSet != null && controllerClassSet.size() > 0) {
 			for (Class<?> clazz : controllerClassSet) {

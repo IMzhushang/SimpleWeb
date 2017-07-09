@@ -1,5 +1,6 @@
 package com.simpleweb.framework.helper;
 
+import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,7 +16,7 @@ import com.simpleweb.framework.util.ClassUtils;
  * @author Administrator
  *
  */
-public class ClassLoaderHelper {
+public class ClassHelper {
 
 	private static final Set<Class<?>> SET_CLASS;
 
@@ -32,9 +33,7 @@ public class ClassLoaderHelper {
 	public static Set<Class<?>> getServiceClassSet() {
 
 		Set<Class<?>> sets = new HashSet<Class<?>>();
-		
-		Set<Class<?>> sets2 = new HashSet<Class<?>>();
-               
+
 		for (Class<?> clazz : SET_CLASS) {
 			// 判断一个类文件上是否有service注解
 			if (clazz.isAnnotationPresent(Service.class)) {
@@ -54,7 +53,6 @@ public class ClassLoaderHelper {
 	 */
 	public static Set<Class<?>> getControllerClassSet() {
 		Set<Class<?>> sets = new HashSet<Class<?>>();
-                Set<Class<?>> sets3 = new HashSet<Class<?>>();
 		for (Class<?> clazz : SET_CLASS) {
 			// 判断一个类文件上是否有service注解
 			if (clazz.isAnnotationPresent(Controller.class)) {
@@ -67,8 +65,9 @@ public class ClassLoaderHelper {
 	}
 
 	/**
-	 *   返回需要实例化的class
-	 * @return  包含了@sevice @ conteoller 的注解的Class
+	 * 返回需要实例化的class
+	 * 
+	 * @return 包含了@sevice @ conteoller 的注解的Class
 	 */
 	public static Set<Class<?>> getBeanClass() {
 		Set<Class<?>> beanSet = new HashSet<Class<?>>();
@@ -78,6 +77,48 @@ public class ClassLoaderHelper {
 
 		return beanSet;
 
+	}
+
+	/**
+	 * 获得标注了某个注解的类
+	 * 
+	 * @param clz
+	 * @return
+	 */
+	public static Set<Class<?>> getClassSetByAnnotation(
+			Class<? extends Annotation> clz) {
+
+		Set<Class<?>> sets = new HashSet<Class<?>>();
+
+		for (Class<?> clazz : SET_CLASS) {
+			if (clazz.isAnnotationPresent(clz)) {
+				sets.add(clazz);
+			}
+
+		}
+
+		return sets;
+
+	}
+
+	/**
+	 * 获得摸一个接口或者父类的所有子类
+	 * 
+	 * @param clz
+	 * @return
+	 */
+	public static Set<Class<?>> getClassSetBySuperClass(Class<?> clz) {
+
+		Set<Class<?>> sets = new HashSet<Class<?>>();
+
+		for (Class<?> clazz : SET_CLASS) {
+			// TODO 判断一个类是否某个类的子类
+			if (clz.isAssignableFrom(clazz) && !clz.equals(clazz)) {
+				sets.add(clazz);
+			}
+		}
+
+		return sets;
 	}
 
 }
