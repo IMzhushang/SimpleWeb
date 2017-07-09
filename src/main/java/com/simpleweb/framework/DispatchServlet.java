@@ -128,7 +128,7 @@ public class DispatchServlet extends HttpServlet {
 
 			// 调用方法
 			Object result = ReflectionUtils.invokeMathod(controlleBean,
-					actionMethod, param);
+					actionMethod, param.getParams());
 
 			if (result instanceof View) {
 				// 视图类型
@@ -160,7 +160,7 @@ public class DispatchServlet extends HttpServlet {
 					response.setContentType("application/json");
 					response.setCharacterEncoding("UTF-8");
 					PrintWriter writer = response.getWriter();
-					String json = JsonUtils.toJson(data);
+					String json = JsonUtils.toJson(model);
 	                 System.err.println("-----Response---"  + json);
 					writer.write(json);
 					writer.flush();
@@ -170,19 +170,6 @@ public class DispatchServlet extends HttpServlet {
 
 		}
 
-	}
-
-	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		
-		  System.err.println("----doGet -----"  + req.getRequestURL());
-	}
-
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		System.err.println("----doPost -----"  + req.getRequestURL());
 	}
 
 }

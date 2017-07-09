@@ -19,4 +19,15 @@ public class Param {
 		this.paramMap = paramMap;
 	}
 
+	public Object[] getParams() {
+		Object[] params = new Object[paramMap.size()];
+
+		int index = 0;
+		for (Map.Entry<String, Object> entry : paramMap.entrySet()) {
+			params[index++] = entry.getValue();
+		}
+
+		return params;
+	}
+
 }

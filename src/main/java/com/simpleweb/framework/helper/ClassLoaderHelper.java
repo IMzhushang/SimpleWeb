@@ -34,8 +34,6 @@ public class ClassLoaderHelper {
 		Set<Class<?>> sets = new HashSet<Class<?>>();
 		
 		
-		Set<Class<?>> sets2 = new HashSet<Class<?>>();
-		
                
 		for (Class<?> clazz : SET_CLASS) {
 			// 判断一个类文件上是否有service注解
