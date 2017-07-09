@@ -3,6 +3,9 @@ package com.simpleweb.framework.helper;
 import java.util.HashMap;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.simpleweb.framework.util.ReflectionUtils;
 
 /**
@@ -15,6 +18,10 @@ import com.simpleweb.framework.util.ReflectionUtils;
  */
 public class BeanHelper {
 
+	/* 日志组件 */
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(BeanHelper.class);
+
 	/**
 	 * 存儲Bean
 	 */
@@ -26,6 +33,7 @@ public class BeanHelper {
 		for (Class<?> clazz : beanClass) {
 			Object newInstance = ReflectionUtils.newInstance(clazz);
 			CLASS_BEAN.put(clazz, newInstance);
+			LOGGER.error(" ---"+clazz.getName()+"- 被添加到bean容器" );
 		}
 	}
 
@@ -50,9 +58,10 @@ public class BeanHelper {
 	 * @param object
 	 */
 	public static void setBean(Class<?> clazz, Object object) {
-		
-			CLASS_BEAN.put(clazz, object);
-		
+
+		CLASS_BEAN.put(clazz, object);
+		LOGGER.error(" ---"+clazz.getName()+"- 被添加到bean容器" );
+
 	}
 
 	public static HashMap<Class<?>, Object> getBeanMap() {

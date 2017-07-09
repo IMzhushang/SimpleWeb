@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.simpleweb.framework.helper.BeanHelper;
 import com.simpleweb.framework.helper.ClassHelper;
 
@@ -18,6 +21,9 @@ import com.simpleweb.framework.helper.ClassHelper;
  *
  */
 public class AopHelper {
+
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(AopHelper.class);
 
 	static {
 
@@ -31,6 +37,9 @@ public class AopHelper {
 						entry.getValue());
 
 				BeanHelper.setBean(entry.getKey(), createProxy);
+				LOGGER.error("--" + entry.getKey().getName()
+						+ "--- 被创建了一个AOP代理 ---"
+						+ createProxy.getClass().getName() + "---放入了bean容器");
 
 			}
 
