@@ -54,7 +54,7 @@ public class ClassLoaderHelper {
 	 */
 	public static Set<Class<?>> getControllerClassSet() {
 		Set<Class<?>> sets = new HashSet<Class<?>>();
-
+                Set<Class<?>> sets3 = new HashSet<Class<?>>();
 		for (Class<?> clazz : SET_CLASS) {
 			// 判断一个类文件上是否有service注解
 			if (clazz.isAnnotationPresent(Controller.class)) {
