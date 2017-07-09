@@ -1,0 +1,21 @@
+package com.simpleweb.framework.aop;
+
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * 定义切面类的代理
+ * 
+ * @author Administrator
+ *
+ */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Aspect {
+
+	Class<? extends Annotation> value();
+
+}
