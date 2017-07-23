@@ -5,6 +5,7 @@ import com.simpleweb.framework.helper.BeanHelper;
 import com.simpleweb.framework.helper.ClassHelper;
 import com.simpleweb.framework.helper.ControllerHelper;
 import com.simpleweb.framework.helper.IOCHelper;
+import com.simpleweb.framework.orm.EntryHelper;
 import com.simpleweb.framework.util.ClassUtils;
 
 /**
@@ -18,8 +19,9 @@ public class HelperLoder {
 	 * 初始化框架
 	 */
 	public static void init() {
-		Class<?>[] classList = { ClassHelper.class, BeanHelper.class,
-				AopHelper.class, IOCHelper.class, ControllerHelper.class };
+		Class<?>[] classList = { ClassHelper.class, EntryHelper.class,
+				BeanHelper.class, AopHelper.class, IOCHelper.class,
+				ControllerHelper.class };
 
 		for (int i = 0; i < classList.length; i++) {
 			ClassUtils.loadClass(classList[i].getName(), true);

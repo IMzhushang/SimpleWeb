@@ -17,8 +17,11 @@ public final class ConfigHelper {
 			.LoadProperties(ConfigConstant.CONFING_FILES);
 
 	public static String getAppBasePackage() {
-		System.out.println("---->appBase" + PropsUtils.getValueBykey(ConfigConstant.APP_BASE_PACKAGE, PROPER));
-		return PropsUtils.getValueBykey(ConfigConstant.APP_BASE_PACKAGE, PROPER);
+		System.out.println("---->appBase"
+				+ PropsUtils.getValueBykey(ConfigConstant.APP_BASE_PACKAGE,
+						PROPER));
+		return PropsUtils
+				.getValueBykey(ConfigConstant.APP_BASE_PACKAGE, PROPER);
 
 	}
 
@@ -27,8 +30,19 @@ public final class ConfigHelper {
 	}
 
 	public static String getAppAssetPath() {
-	//	System.out.println("---->appBase" + PropsUtils.getValueBykey(ConfigConstant.APP_BASE_PACKAGE, PROPER));
+		// System.out.println("---->appBase" +
+		// PropsUtils.getValueBykey(ConfigConstant.APP_BASE_PACKAGE, PROPER));
 		return PropsUtils.getValueBykey(ConfigConstant.APP_ASSET_PATH, PROPER);
+	}
+
+	/**
+	 * 根据key 拿到value
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public static String getString(String key) {
+		return PropsUtils.getValueBykey(key, PROPER);
 	}
 
 }

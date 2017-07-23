@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import com.simpleweb.framework.helper.BeanHelper;
 import com.simpleweb.framework.helper.ClassHelper;
+import com.simpleweb.framework.transcation.TranscationProxy;
+import com.simpleweb.framework.transcation.annoacton.Service;
 
 /**
  * 来实现Aop
@@ -95,6 +97,18 @@ public class AopHelper {
 		 */
 
 		// 得到所有AbstractProxy的子类
+		addAspectProxy(proxyTargetMap);
+		addTranscationProxy(proxyTargetMap);
+		return proxyTargetMap;
+
+	}
+
+	/**
+	 * 
+	 * @param proxyTargetMap
+	 */
+	private static void addAspectProxy(
+			Map<Class<?>, Set<Class<?>>> proxyTargetMap) {
 		Set<Class<?>> classSetBySuperClass = ClassHelper
 				.getClassSetBySuperClass(AbstractProxy.class);
 		for (Class<?> clz : classSetBySuperClass) {
@@ -105,9 +119,13 @@ public class AopHelper {
 				proxyTargetMap.put(clz, classSetByAnnotation);
 			}
 		}
+	}
 
-		return proxyTargetMap;
-
+	private static void addTranscationProxy(
+			Map<Class<?>, Set<Class<?>>> proxyTargetMap) {
+		Set<Class<?>> classSetByAnnotation = ClassHelper
+				.getClassSetByAnnotation(Service.class);
+		proxyTargetMap.put(TranscationProxy.class, classSetByAnnotation);
 	}
 
 	/**

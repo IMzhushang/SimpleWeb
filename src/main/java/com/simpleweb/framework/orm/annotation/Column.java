@@ -1,4 +1,4 @@
-package com.simpleweb.framework.annotation;
+package com.simpleweb.framework.orm.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,12 +6,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *  service 注解 对于与spring的 sevice
+ *  对应于数据库中的列
  * @author Administrator
  *
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Service {
-
+public @interface Column {
+    String value();
 }
