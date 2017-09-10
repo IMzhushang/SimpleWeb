@@ -2,6 +2,7 @@ package com.simpleweb.framework.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * 通过反射的方式来获得Bean ,并放到容器中去
@@ -44,11 +45,13 @@ public class ReflectionUtils {
 	 * @return
 	 */
 	public static Object invokeMathod(Object object, Method method,
-			Object... args) {
+		  List<Object> args) {
 
 		try {
 			method.setAccessible(true);
-			invoke = method.invoke(object, args);
+		invoke = method.invoke(object, args.toArray());
+		//	method.invoke(obj, args)
+	//	invoke = method.invoke(object, "zhushang","123");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

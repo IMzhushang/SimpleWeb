@@ -2,6 +2,7 @@ package com.simpleweb.framework.dao;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -107,6 +108,10 @@ public class DataBaseHelper {
 	public static int insertOne(String sql, Object... params) {
 		return DATA_ACCESSOR.insertOne(sql, params);
 
+	}
+	
+	public static <T> List<T>  queryList(Class<T> clz,String sql,Object ... params) {
+		  return DATA_ACCESSOR.queryList(clz, sql, params);
 	}
 
 }

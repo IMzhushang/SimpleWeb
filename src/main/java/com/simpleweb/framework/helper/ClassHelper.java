@@ -2,6 +2,7 @@ package com.simpleweb.framework.helper;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.simpleweb.framework.annotation.Controller;
@@ -18,11 +19,17 @@ import com.simpleweb.framework.util.ClassUtils;
  */
 public class ClassHelper {
 
-	private static final Set<Class<?>> SET_CLASS;
+	private static final Set<Class<?>> SET_CLASS = new HashSet<Class<?>>();
 
 	static {
-		String basePackage = ConfigHelper.getAppBasePackage();
-		SET_CLASS = ClassUtils.getClassSet(basePackage);
+		List<String> basePackages = ConfigHelper.getAppBasePackage();
+		if( basePackages != null && basePackages.size() > 0  ) {
+			for(String basePackage : basePackages) {
+				Set<Class<?>>  temp = ClassUtils.getClassSet(basePackage);
+				SET_CLASS.addAll(temp);
+			}
+		}
+		
 	}
 
 	/**

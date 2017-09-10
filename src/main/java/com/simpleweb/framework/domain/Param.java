@@ -1,5 +1,7 @@
 package com.simpleweb.framework.domain;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,12 +21,11 @@ public class Param {
 		this.paramMap = paramMap;
 	}
 
-	public Object[] getParams() {
-		Object[] params = new Object[paramMap.size()];
+	public List<Object> getParams() {
+		List<Object> params = new ArrayList<Object>();
 
-		int index = 0;
 		for (Map.Entry<String, Object> entry : paramMap.entrySet()) {
-			params[index++] = entry.getValue();
+			 params.add(entry.getValue());
 		}
 
 		return params;

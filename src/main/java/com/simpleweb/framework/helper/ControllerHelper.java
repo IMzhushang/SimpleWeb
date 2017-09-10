@@ -35,7 +35,7 @@ public final class ControllerHelper {
 							// 请求映射的路径
 							String requestMapping = action.value();
 
-							if (requestMapping.matches("\\w+:/\\w*")) {
+							if (requestMapping != null && requestMapping.length() > 0 ) {
 								String[] split = requestMapping.split(":");
 								String requestType = split[0];
 								String requestPath = split[1];

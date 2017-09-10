@@ -1,5 +1,7 @@
 package com.simpleweb.framework.dao;
 
+import java.util.List;
+
 /**
  * 定义了数据访问的接口
  * 
@@ -25,4 +27,7 @@ public interface DataAccessor {
 	 * @return 影响数据的条数
 	 */
 	int insertOne(String  sql,Object ... params);
+	
+	
+	public <T> List<T> queryList(Class<T> entry, String sql, Object... params) ;
 }

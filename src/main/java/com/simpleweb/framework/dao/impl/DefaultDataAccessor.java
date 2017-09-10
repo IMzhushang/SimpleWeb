@@ -1,6 +1,7 @@
 package com.simpleweb.framework.dao.impl;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
@@ -9,6 +10,7 @@ import org.apache.commons.dbutils.BasicRowProcessor;
 import org.apache.commons.dbutils.BeanProcessor;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
+import org.apache.commons.dbutils.handlers.BeanListHandler;
 
 import com.simpleweb.framework.dao.DataAccessor;
 import com.simpleweb.framework.dao.DataBaseHelper;
@@ -59,15 +61,43 @@ public class DefaultDataAccessor implements DataAccessor {
 		return result;
 	}
 
-	public int insertOne(String  sql,Object ...param ) {
+	public int insertOne(String sql, Object... param) {
 		System.err.println("sql ----- > " + sql);
-		int  count = 0;
+		int count = 0;
 		try {
-			count = queryRunner.update(DataBaseHelper.getConnection(), sql, param);
+			count = queryRunner.update(DataBaseHelper.getConnection(), sql,
+					param);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return count;
+	}
+	  
+   /**
+    *  list 查询
+    * @param entry
+    * @param sql
+    * @param params
+    * @return
+    */
+	public <T> List<T> queryList(Class<T> entry, String sql, Object... params) {
+		System.err.println("sql ----- > " + sql);
+		List<T> result = null;
+		
+		try {
+			Map<String, String> columnMap = EntryHelper.getColumnMap(entry);
+			if (columnMap != null) {
+				result = queryRunner.query(sql, new BeanListHandler<T>(entry,
+						new BasicRowProcessor(new BeanProcessor(columnMap))),
+						params);
+			} else {
+				result = queryRunner.query(sql, new BeanListHandler<T>(entry),
+						params);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 
 }

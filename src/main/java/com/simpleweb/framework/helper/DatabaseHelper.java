@@ -3,10 +3,6 @@ package com.simpleweb.framework.helper;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.omg.PortableServer.THREAD_POLICY_ID;
-
-import net.sf.cglib.core.TinyBitSet;
-
 /**
  * 操作数据库
  * 

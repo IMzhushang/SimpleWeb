@@ -3,8 +3,8 @@ package com.simpleweb.framework;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
-import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 
 import javax.servlet.ServletConfig;
@@ -17,17 +17,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.simpleweb.framework.domain.Data;
+import com.simpleweb.framework.domain.FormParam;
 import com.simpleweb.framework.domain.Handler;
-import com.simpleweb.framework.domain.Param;
 import com.simpleweb.framework.domain.View;
 import com.simpleweb.framework.helper.BeanHelper;
 import com.simpleweb.framework.helper.ConfigHelper;
 import com.simpleweb.framework.helper.ControllerHelper;
-import com.simpleweb.framework.util.CodeUtils;
+import com.simpleweb.framework.helper.UploadHelper;
+import com.simpleweb.framework.mvc.ViewResolver;
 import com.simpleweb.framework.util.JsonUtils;
 import com.simpleweb.framework.util.ReflectionUtils;
-import com.simpleweb.framework.util.StreamUtils;
-import com.simpleweb.framework.util.StringUtils;
+import com.simpleweb.framework.util.RequestHelper;
 
 /**
  * 完成对请求的分发，结果的返回
@@ -60,12 +60,15 @@ public class DispatchServlet extends HttpServlet {
 		// 动态的注册jsp Servlet
 		ServletRegistration jspServlet = servletContext
 				.getServletRegistration("jsp");
-		jspServlet.addMapping(ConfigHelper.getAppJspPath()+ "*");
+		jspServlet.addMapping(ConfigHelper.getAppJspPath() + "*");
 
 		// 处理静态资源的servlet
 		ServletRegistration defaultServlet = servletContext
 				.getServletRegistration("default");
-		defaultServlet.addMapping(ConfigHelper.getAppAssetPath()+ "*");
+		defaultServlet.addMapping(ConfigHelper.getAppAssetPath() + "*");
+
+		// 文件上传的初始化
+		UploadHelper.init(servletContext);
 	}
 
 	@Override
@@ -76,6 +79,10 @@ public class DispatchServlet extends HttpServlet {
 		// 得到请求的路径
 		String requestPath = request.getPathInfo();
 
+		if (requestPath.equals("/favicon.ico")) {
+			return;
+		}
+
 		Handler handler = ControllerHelper.getHandler(requestType, requestPath);
 
 		System.out.println("------>>>>> " + request.getRequestURL().toString());
@@ -84,40 +91,39 @@ public class DispatchServlet extends HttpServlet {
 		if (handler != null) {
 
 			// 创建请求参数对象 先处理get请求
-			Map<String, Object> paramMap = new HashMap<String, Object>();
-			Enumeration<String> parameterNames = request.getParameterNames();
-
-			while (parameterNames.hasMoreElements()) {
-				String paramName = parameterNames.nextElement();
-
-				String paramValue = request.getParameter(paramName);
-
-				paramMap.put(paramName, paramValue);
-			}
-
-			// 处理post请求
-
-			String body = CodeUtils.decodeURL(StreamUtils.getString(request
-					.getInputStream()));
-
-			if (StringUtils.isNotEmpty(body)) {
-				String[] params = body.split("&");
-
-				if (params != null && params.length > 0) {
-					for (String param : params) {
-						String[] array = param.split("=");
-						if (array != null && array.length > 0) {
-							String paramName = array[0];
-							String paramValue = array[1];
-							paramMap.put(paramName, paramValue);
-						}
-					}
-				}
+			/*
+			 * Map<String, Object> paramMap = new HashMap<String, Object>();
+			 * Enumeration<String> parameterNames = request.getParameterNames();
+			 * 
+			 * while (parameterNames.hasMoreElements()) { String paramName =
+			 * parameterNames.nextElement();
+			 * 
+			 * String paramValue = request.getParameter(paramName);
+			 * 
+			 * paramMap.put(paramName, paramValue); }
+			 * 
+			 * // 处理post请求
+			 * 
+			 * String body = CodeUtils.decodeURL(StreamUtils.getString(request
+			 * .getInputStream()));
+			 * 
+			 * if (StringUtils.isNotEmpty(body)) { String[] params =
+			 * body.split("&");
+			 * 
+			 * if (params != null && params.length > 0) { for (String param :
+			 * params) { String[] array = param.split("="); if (array != null &&
+			 * array.length > 0) { String paramName = array[0]; String
+			 * paramValue = array[1]; paramMap.put(paramName, paramValue); } } }
+			 * }
+			 */
+			FormParam param;
+			if (UploadHelper.isMultipart(request)) {
+				param = UploadHelper.createParam(request);
+			} else {
+				param = RequestHelper.createParam(request);
 			}
 
 			// 要调用方法的参数
-
-			Param param = new Param(paramMap);
 
 			// 要调用的方法
 			Method actionMethod = handler.getActionMethod();
@@ -127,32 +133,86 @@ public class DispatchServlet extends HttpServlet {
 			Object controlleBean = BeanHelper.getBean(controllerClass);
 
 			// 调用方法
-			Object result = ReflectionUtils.invokeMathod(controlleBean,
-					actionMethod, param.getParams());
+			// 目前的两个问题
+			// 1. 方法参数的顺序问题
+			// 2. 参数类型问题
+			Object result;
+			ArrayList<Object> paramList = new ArrayList<Object>();
+			if (UploadHelper.isMultipart(request)) {
+
+				paramList.add(param);
+				result = ReflectionUtils.invokeMathod(controlleBean,
+						actionMethod, paramList);
+			} else {
+
+				Collection<Object> values = param.getFieldMap().values();
+				for (Object object : values) {
+					paramList.add(object);
+				}
+				result = ReflectionUtils.invokeMathod(controlleBean,
+						actionMethod, paramList);
+			}
 
 			if (result instanceof View) {
 				// 视图类型
 				View view = (View) result;
 				String path = view.getViewPath();
-				if (path != null) {
-					if (path.startsWith("/")) {
-						response.sendRedirect(request.getContextPath() + path);
-					} else {
-						Map<String, Object> model = view.getModel();
-						for (Map.Entry<String, Object> entry : model.entrySet()) {
-							request.setAttribute(entry.getKey(),
-									entry.getValue());
-						}
-						// TODO why
-						request.getRequestDispatcher(
-								ConfigHelper.getAppJspPath() + path+".jsp").forward(
-								request, response);
+
+				// 判断是什么视图解析器
+				ViewResolver viewResolver = getViewResolver();
+				if (viewResolver == null) {
+					return;
+				}
+
+				// TODO 视图解析器待修改
+				request.setCharacterEncoding("UTF-8");
+		         response.setContentType("text/html;charset=UTF-8");
+				if (ConfigHelper
+						.getTemplateResolver()
+						.equals("com.simpleweb.framework.mvc.impl.ThymeleafViewResolver")) {
+					// ThymeleafView
+					try {
+						viewResolver.resovler(request, response, path,
+								view.getModel());
+					} catch (Exception e) {
+						e.printStackTrace();
 					}
+				} else if (ConfigHelper
+						.getTemplateResolver()
+						.equals("com.simpleweb.framework.mvc.impl.VelocityViewResolver")) {
+					try {
+						viewResolver.resovler(request, response, path,
+								view.getModel());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+				} else {
+					// jsp
+					if (path != null) {
+						if (path.startsWith("/")) {
+							response.sendRedirect(request.getContextPath()
+									+ path);
+						} else {
+							Map<String, Object> model = view.getModel();
+							for (Map.Entry<String, Object> entry : model
+									.entrySet()) {
+								request.setAttribute(entry.getKey(),
+										entry.getValue());
+							}
+							// TODO why
+							request.getRequestDispatcher(
+									ConfigHelper.getAppJspPath() + path
+											+ ".jsp")
+									.forward(request, response);
+						}
+					}
+
 				}
 
 			} else {
 				// 数据类型
-				System.err.println("-----Response--- Data" );
+				System.err.println("-----Response--- Data");
 				Data data = (Data) result;
 				Object model = data.getModel();
 
@@ -161,7 +221,7 @@ public class DispatchServlet extends HttpServlet {
 					response.setCharacterEncoding("UTF-8");
 					PrintWriter writer = response.getWriter();
 					String json = JsonUtils.toJson(model);
-	                 System.err.println("-----Response---"  + json);
+					System.err.println("-----Response---" + json);
 					writer.write(json);
 					writer.flush();
 					writer.close();
@@ -172,4 +232,17 @@ public class DispatchServlet extends HttpServlet {
 
 	}
 
+	public ViewResolver getViewResolver() {
+		String templateResolver = ConfigHelper.getTemplateResolver();
+		try {
+			return (ViewResolver) Class.forName(templateResolver).newInstance();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 }
