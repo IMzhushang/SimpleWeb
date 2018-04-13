@@ -3,7 +3,9 @@ package com.simpleweb.framework.util;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -38,6 +40,8 @@ public class RequestHelper {
 
 		String body = CodeUtils.decodeURL(StreamUtils.getString(request
 				.getInputStream()));
+		
+		Map<String, List<String>> paramMap  =new HashMap<String, List<String>>();
 
 		if (StringUtils.isNotEmpty(body)) {
 			String[] params = body.split("&");
@@ -48,10 +52,24 @@ public class RequestHelper {
 					if (array != null && array.length == 2) {
 						String paramName = array[0];
 						String paramValue = array[1];
-						fieldParams.add(new FieldParam(paramName, paramValue));
+					  List<String> temp = 	paramMap.get(paramName);
+					  if( temp == null ) {
+						  temp = new ArrayList<String>();
+						  paramMap.put(paramName, temp);
+					  }
+						temp.add(paramValue);
 					}
 				}
 			}
+			
+			for(Map.Entry<String, List<String>> entry : paramMap.entrySet() ) {
+				 if( entry.getValue().size()  == 1 ) {
+					 fieldParams.add(new FieldParam(entry.getKey(), entry.getValue().get(0)));
+				 }else {
+					 fieldParams.add(new FieldParam(entry.getKey(), entry.getValue()));
+				 }
+			}
+			
 		}
 
 		return fieldParams;
@@ -73,14 +91,11 @@ public class RequestHelper {
 				if (parameterValues.length == 1) {
 					value = parameterValues[0];
 				} else {
-					StringBuffer sb = new StringBuffer();
+					List<String> temp = new ArrayList<String>();
 					for (int i = 0; i < parameterValues.length; i++) {
-						sb.append(parameterValues[i]);
-						if (i != parameterValues.length - 1) {
-							sb.append(StringUtils.SEPARATOR);
-						}
+						temp.add(parameterValues[i]);
 					}
-					value = sb.toString();
+					value =temp;
 				}
 				formParams.add(new FieldParam(fieldName, value));
 			}

@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -75,6 +76,8 @@ public class UploadHelper {
 		try {
 			Map<String, List<FileItem>> parseParameterMap = servletFileUpload
 					.parseParameterMap(request);
+			// 保存普通字段
+			Map<String, List<String>> paramMap  =new HashMap<String, List<String>>();
 
 			if (parseParameterMap != null && parseParameterMap.size() > 0) {
 				for (Map.Entry<String, List<FileItem>> entry : parseParameterMap
@@ -87,9 +90,16 @@ public class UploadHelper {
 							// 判断是否是普通表单字段
 							if (fileItem.isFormField()) {
 								// 普通的表单字段
-								String fieldValue = fileItem.getString("UTF-8");
-								fieldParams.add(new FieldParam(fieldName,
-										fieldValue));
+					     		String fieldValue = fileItem.getString("UTF-8");
+							//	fieldParams.add(new FieldParam(fieldName,
+								//		fieldValue));
+					     		  List<String> temp = 	paramMap.get(fieldName);
+								  if( temp == null ) {
+									  temp = new ArrayList<String>();
+									  paramMap.put(fieldName, temp);
+								  }
+									temp.add(fieldValue);
+								
 							} else {
 								// 文件字段
 
@@ -115,6 +125,14 @@ public class UploadHelper {
 						}
 					}
 				}
+			}
+			
+			for(Map.Entry<String, List<String>> entry : paramMap.entrySet() ) {
+				 if( entry.getValue().size()  == 1 ) {
+					 fieldParams.add(new FieldParam(entry.getKey(), entry.getValue().get(0)));
+				 }else {
+					 fieldParams.add(new FieldParam(entry.getKey(), entry.getValue()));
+				 }
 			}
 
 		} catch (Exception e) {

@@ -2,9 +2,11 @@ package com.simpleweb.framework;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletConfig;
@@ -15,8 +17,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.simpleweb.framework.domain.Data;
+import com.simpleweb.framework.domain.FileParam;
 import com.simpleweb.framework.domain.FormParam;
 import com.simpleweb.framework.domain.Handler;
 import com.simpleweb.framework.domain.View;
@@ -25,9 +29,12 @@ import com.simpleweb.framework.helper.ConfigHelper;
 import com.simpleweb.framework.helper.ControllerHelper;
 import com.simpleweb.framework.helper.UploadHelper;
 import com.simpleweb.framework.mvc.ViewResolver;
+import com.simpleweb.framework.util.BeanUtils;
+import com.simpleweb.framework.util.ClassUtils;
 import com.simpleweb.framework.util.JsonUtils;
 import com.simpleweb.framework.util.ReflectionUtils;
 import com.simpleweb.framework.util.RequestHelper;
+import com.simpleweb.framework.util.type.HandlerMethod.MethodParameterPair;
 
 /**
  * 完成对请求的分发，结果的返回
@@ -58,14 +65,19 @@ public class DispatchServlet extends HttpServlet {
 		ServletContext servletContext = config.getServletContext();
 
 		// 动态的注册jsp Servlet
-		ServletRegistration jspServlet = servletContext
-				.getServletRegistration("jsp");
-		jspServlet.addMapping(ConfigHelper.getAppJspPath() + "*");
+		if(ConfigHelper.getAppJspPath() != null ) {
+			ServletRegistration jspServlet = servletContext
+					.getServletRegistration("jsp");
+			jspServlet.addMapping(ConfigHelper.getAppJspPath() + "*");
+		}
 
 		// 处理静态资源的servlet
-		ServletRegistration defaultServlet = servletContext
-				.getServletRegistration("default");
-		defaultServlet.addMapping(ConfigHelper.getAppAssetPath() + "*");
+		if( ConfigHelper.getAppAssetPath() != null ) {
+			ServletRegistration defaultServlet = servletContext
+					.getServletRegistration("default");
+			defaultServlet.addMapping(ConfigHelper.getAppAssetPath() + "*");
+		}
+	
 
 		// 文件上传的初始化
 		UploadHelper.init(servletContext);
@@ -136,23 +148,13 @@ public class DispatchServlet extends HttpServlet {
 			// 目前的两个问题
 			// 1. 方法参数的顺序问题
 			// 2. 参数类型问题
-			Object result;
-			ArrayList<Object> paramList = new ArrayList<Object>();
-			if (UploadHelper.isMultipart(request)) {
-
-				paramList.add(param);
-				result = ReflectionUtils.invokeMathod(controlleBean,
-						actionMethod, paramList);
-			} else {
-
-				Collection<Object> values = param.getFieldMap().values();
-				for (Object object : values) {
-					paramList.add(object);
-				}
-				result = ReflectionUtils.invokeMathod(controlleBean,
-						actionMethod, paramList);
+			
+			Map<String, Object> paramList = param.getFieldMap();
+			if( param.getFileMap() != null && param.getFieldMap().size() > 0 ) {
+			    paramList.putAll(param.getFileMap());
 			}
-
+			Object result =   invokeHander(controlleBean, handler, request, response,paramList);
+			
 			if (result instanceof View) {
 				// 视图类型
 				View view = (View) result;
@@ -244,5 +246,139 @@ public class DispatchServlet extends HttpServlet {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	/**
+	 *  执行方法
+	 * @param controllerBean
+	 * @param handler
+	 * @param request
+	 * @param response
+	 * @return 
+	 */
+	public Object  invokeHander(Object controllerBean,Handler handler,HttpServletRequest request,
+			HttpServletResponse response ,Map<String, Object> fields) {
+		   // 拿到要执行方法的参数
+		MethodParameterPair[] methodParameterPairs = handler.getParameter();
+		if( methodParameterPairs == null || methodParameterPairs.length < 1 ) {
+			// 报错
+			throw new RuntimeException(" methodParameterPairs is null");
+		}
+		Object[] params  = new Object[methodParameterPairs.length];
+		
+		for( int i= 0 ; i<methodParameterPairs.length ; i++ ) {
+			    Class<?> type = methodParameterPairs[i].getType();
+			    String fieldName = methodParameterPairs[i].getName();
+			    String className = type.getName();
+			    // 支持的几个基本类型
+		/*	  if( className.equals(Integer.class.getName()) || className.equals(int.class.getName())) {
+				  
+			  }else if( className.equals(Double.class.getName() ) || className.equals(double.class.getName() ) ) {
+				  
+			  }else if( className.equals(Float.class.getName() ) || className.equals(float.class.getName() ) ) {
+				  
+			  }else if( className.equals(Long.class.getName() ) || className.equals(long.class.getName() )) {
+				  
+			  }else if( className.equals(String.class.getName() )) {
+				  
+			  }else {
+				  // 自定义类型
+			  }*/
+			  
+			  if( type.isArray() ) {
+				  // 数组类型 只支持基本类型的一维数组
+				  //  判断具体是什么类型的数组
+				 Class<?> arrayType =   type.getComponentType();
+				 String componentType = arrayType.getName();
+				 List<String> oneField = (List<String>) fields.get(fieldName);
+				 
+				 if( componentType.equals(Integer.class.getName()) || componentType.equals(int.class.getName())) {
+					  Integer[] newFields  = new Integer[oneField.size()];
+					  for(int index=0 ; index<oneField.size() ; index++ ) {
+						   newFields[index] = Integer.valueOf(oneField.get(index));
+					  }
+					  params[i] = newFields;
+				  }else if( componentType.equals(Double.class.getName() ) || componentType.equals(double.class.getName() ) ) {
+					  Double[] newFields  = new Double[oneField.size()];
+					  for(int index=0 ; index<oneField.size() ; index++ ) {
+						  newFields[index] = Double.valueOf(oneField.get(index));
+					  }
+					  params[i] = newFields;
+				  }else if( componentType.equals(Float.class.getName() ) || componentType.equals(float.class.getName() ) ) {
+					  Float[] newFields  = new Float[oneField.size()];
+					  for(int index=0 ; index<oneField.size() ; index++ ) {
+						  newFields[index] = Float.valueOf(oneField.get(index));
+					  }
+					  params[i] = newFields;
+				  }else if( componentType.equals(Long.class.getName() ) || componentType.equals(long.class.getName() )) {
+					  Long[] newFields  = new Long[oneField.size()];
+					  for(int index=0 ; index<oneField.size() ; index++ ) {
+						  newFields[index] = Long.valueOf(oneField.get(index));
+					  }
+					  params[i] = newFields;
+				  }else if( componentType.equals(String.class.getName() )) {
+					  String[] newFields  = new String[oneField.size()];
+					  for(int index=0 ; index<oneField.size() ; index++ ) {
+						  newFields[index] = oneField.get(index);
+					  }
+					  params[i] = newFields;
+				  }else if( componentType.equals( Boolean.class.getName()) || componentType.equals(Boolean.class.getName())) {
+					  Boolean[] newFields  = new Boolean[oneField.size()];
+					  for(int index=0 ; index<oneField.size() ; index++ ) {
+							    newFields[index] = Boolean.valueOf(oneField.get(index));
+					  }
+					  params[i] = newFields;
+				  }else {
+					  //报错
+					  throw new  RuntimeException("can not support this type"+ className);
+				  }
+				 
+				 
+			  }else if( type.isAssignableFrom(List.class)) {
+				  // List集合 只支持String的List集合
+				  // 判断List的泛型
+				params[i] =  (List<String>) fields.get(fieldName);
+			  }else if (type.isPrimitive() || className.equals(Integer.class.getName()) || className.equals(Double.class.getName() )
+					  ||  className.equals(Float.class.getName() ) || className.equals(Long.class.getName() ) || className.equals(String.class.getName() )
+					  ||  className.equals( Boolean.class.getName())) {
+				  // 基本类型
+				  if( className.equals(Integer.class.getName()) || className.equals(int.class.getName())) {
+					  params[i] = Integer.valueOf((String) fields.get(fieldName));
+				  }else if( className.equals(Double.class.getName() ) || className.equals(double.class.getName() ) ) {
+					  params[i] =Double.valueOf((String) fields.get(fieldName));
+				  }else if( className.equals(Float.class.getName() ) || className.equals(float.class.getName() ) ) {
+					
+					  params[i] =Float.valueOf((String) fields.get(fieldName));
+				  }else if( className.equals(Long.class.getName() ) || className.equals(long.class.getName() )) {
+					  
+					  params[i] =Long.valueOf((String) fields.get(fieldName));
+				  }else if( className.equals(String.class.getName() )) {
+					  params[i] =(String) fields.get(fieldName);
+				  }else if( className.equals( Boolean.class.getName()) || className.equals(Boolean.class.getName())) {
+					  params[i] = Boolean.valueOf((String) fields.get(fieldName));
+				  }else {
+					  //报错
+					  throw new  RuntimeException("can not support this type"+ className);
+				  }
+			  }else {
+				  // 自定义类型
+				  // 判断 是否是 request  response session
+				  if( className.equals(HttpServletRequest.class.getName()) ) {
+					  params[i] = request;
+				  }else if( className.equals(HttpServletResponse.class.getName())) {
+					  params[i] = response;
+				  }else if( className.equals(HttpSession.class.getName() ) ) {
+					  params[i] = request.getSession();
+				  }else if(className.equals(FileParam.class.getName())) {
+					  List<FileParam> fileParams = (List<FileParam>) fields.get(fieldName);
+					  params[i] = fileParams.get(0);
+				  }else {
+					  params[i] = BeanUtils.FillBean(type, fields);
+				  }
+			  }
+			  
+		}
+		
+	 return 	ReflectionUtils.invokeMathod(controllerBean, handler.getActionMethod(), params);
 	}
 }

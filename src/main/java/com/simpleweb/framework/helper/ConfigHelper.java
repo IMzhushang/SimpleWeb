@@ -21,9 +21,7 @@ public final class ConfigHelper {
 			.LoadProperties(ConfigConstant.CONFING_FILES);
 
 	public static List<String> getAppBasePackage() {
-		System.out.println("---->appBase"
-				+ PropsUtils.getValueBykey(ConfigConstant.APP_BASE_CONTROLLER_PACKAGE,
-						PROPER));
+		
 		// controller 包
 		String baseController = PropsUtils
 		.getValueBykey(ConfigConstant.APP_BASE_CONTROLLER_PACKAGE, PROPER);
@@ -31,6 +29,9 @@ public final class ConfigHelper {
 		
 		String baseService = PropsUtils
 				.getValueBykey(ConfigConstant.APP_BASE_SERVICE_PACKAGE, PROPER);
+		
+		System.out.println("---->appBase："
+				+baseService);
 		
 		List<String> basePackageList = new ArrayList<String>();
 		

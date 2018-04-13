@@ -13,7 +13,7 @@ import com.simpleweb.framework.util.ReflectionUtils;
  * 
  * 保存 class --- bean 的映射关系
  * 
- * @author Administrator
+ * @author  zhushang.zs
  *
  */
 public class BeanHelper {
