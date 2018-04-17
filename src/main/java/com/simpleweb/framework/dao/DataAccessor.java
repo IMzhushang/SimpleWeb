@@ -30,4 +30,32 @@ public interface DataAccessor {
 	
 	
 	public <T> List<T> queryList(Class<T> entry, String sql, Object... params) ;
+	
+	/**
+	 *  更具条件查询数量
+	 * @param entry
+	 * @param sql
+	 * @return
+	 */
+	public <T> long  queryCount(Class<T> entry, String sql) ;
+	
+	/**
+	 *  更新记录
+	 * @param clz
+	 * @param sql
+	 * @param params
+	 * @return
+	 */
+	public  <T> int  update(Class<T> clz,String sql,Object ... params) ;
+	
+	/**
+	 *  分页查询
+	 * @param clz
+	 * @param sql
+	 * @return
+	 */
+	public  <T> List<T>  queryByPage(Class<T> clz, String sql) ;
+	
 }
+
+

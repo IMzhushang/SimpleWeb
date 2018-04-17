@@ -98,7 +98,8 @@ public class AopHelper {
 
 		// 得到所有AbstractProxy的子类
 		addAspectProxy(proxyTargetMap);
-		addTranscationProxy(proxyTargetMap);
+		// TODO  service 的代理暂时不做
+		//addTranscationProxy(proxyTargetMap);
 		return proxyTargetMap;
 
 	}

@@ -11,6 +11,7 @@ import org.apache.commons.dbutils.BeanProcessor;
 import org.apache.commons.dbutils.QueryRunner;
 import org.apache.commons.dbutils.handlers.BeanHandler;
 import org.apache.commons.dbutils.handlers.BeanListHandler;
+import org.apache.commons.dbutils.handlers.ScalarHandler;
 
 import com.simpleweb.framework.dao.DataAccessor;
 import com.simpleweb.framework.dao.DataBaseHelper;
@@ -99,5 +100,46 @@ public class DefaultDataAccessor implements DataAccessor {
 		}
 		return result;
 	}
+
+public <T> long queryCount(Class<T> entry, String sql) {
+	long  result = 0;
+     try {
+		 result = queryRunner.query(sql,new  ScalarHandler<Long>());
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+	return result;
+}
+
+public <T> int update(Class<T> clz, String sql, Object... params) {
+
+	try {
+		return queryRunner.update(sql, params);
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+	return -1;
+}
+
+public <T> List<T> queryByPage(Class<T> entry, String sql) {
+	
+	System.err.println("sql ----- > " + sql);
+	List<T> result = null;
+	
+	try {
+		Map<String, String> columnMap = EntryHelper.getColumnMap(entry);
+		if (columnMap != null) {
+			result = queryRunner.query(sql, new BeanListHandler<T>(entry,
+					new BasicRowProcessor(new BeanProcessor(columnMap))));
+		} else {
+			result = queryRunner.query(sql, new BeanListHandler<T>(entry));
+		}
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+	return result;
+}
+	
+	
 
 }

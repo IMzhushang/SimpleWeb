@@ -113,5 +113,19 @@ public class DataBaseHelper {
 	public static <T> List<T>  queryList(Class<T> clz,String sql,Object ... params) {
 		  return DATA_ACCESSOR.queryList(clz, sql, params);
 	}
+	
+	public static <T> long  queryCount(Class<T> clz,String sql) {
+		return DATA_ACCESSOR.queryCount(clz, sql);
+	}
+	
+	public static <T> int  update(Class<T> clz,String sql,Object ... params) {
+		  return DATA_ACCESSOR.update(clz, sql, params);
+	} 
+	
+	
+	public static <T> List<T>  queryByPage(Class<T> clz, String sql) {
+		return DATA_ACCESSOR.queryByPage(clz, sql);
+		
+	}
 
 }
